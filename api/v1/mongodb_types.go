@@ -18,6 +18,21 @@ package v1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)	apimeta "k8s.io/apimachinery/pkg/api/meta"
+
+
+const (
+	ConditionTypeProgressing string = "Progressing"
+	ConditionTypeReconcile   string = "Reconcile"
+	ConditionTypeAvailable   string = "Available"
+
+	ConditionReasonPreparing           string = "Preparing"
+	ConditionReasonRunning             string = "Running"
+	ConditionReasonConfig              string = "Config"
+	ConditionReasonReconcilePVC        string = "ReconcilePVC"
+	ConditionReasonReconcileService    string = "ReconcileService"
+	ConditionReasonReconcileIngress    string = "ReconcileIngress"
+	ConditionReasonReconcileDeployment string = "ReconcileDeployment"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -29,13 +44,21 @@ type MongoDBSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Foo is an example field of MongoDB. Edit mongodb_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	ReplicaCount int32  `json:"replicaCount"`
+	StorageSize  string `json:"storageSize"`
+}
+
+type Node struct {
+	HostName string `json:"hostName,omitempty"`
+	IP       string `json:"ip,omitempty"`
+	Status   string `json:"status,omitempty"`
 }
 
 // MongoDBStatus defines the observed state of MongoDB
 type MongoDBStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// Phase string `json:"phase"`
+	Condition []metav1.Condition `json:"condition"`
+	Nodes     []Node             `json:"nodes,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -62,3 +85,39 @@ type MongoDBList struct {
 func init() {
 	SchemeBuilder.Register(&MongoDB{}, &MongoDBList{})
 }
+func (m *MongoDB) SetStatusCondition(condition metav1.Condition) {
+	// if the condition already exists, update it
+	existingCondition := apimeta.FindStatusCondition(m.Status.Conditions, condition.Type)
+	if existingCondition == nil {
+		condition.ObservedGeneration = m.GetGeneration()
+		condition.LastTransitionTime = metav1.Now()
+		m.Status.Conditions = append(m.Status.Conditions, condition)
+	} else if existingCondition.Status != condition.Status || existingCondition.Reason != condition.Reason || existingCondition.Message != condition.Message {
+		existingCondition.Status = condition.Status
+		existingCondition.Reason = condition.Reason
+		existingCondition.Message = condition.Message
+		existingCondition.ObservedGeneration = m.GetGeneration()
+		existingCondition.LastTransitionTime = metav1.Now()
+	}
+}
+
+func (m *MongoDB) InitStatusCondtions() {
+	m.Status.Condition = []metav1.Condition{}
+	m.SetStatusCondition(metav1.Condition{
+		Type:               ConditionTypeProgressing,
+		Status:             metav1.ConditionTrue,
+		ObservedGeneration: m.GetGeneration(),
+		LastTransitionTime: metav1.Now(),
+		Reason:             ConditionReasonPreparing,
+		Message:            "Mongodb is preparing",
+	})
+	m.SetStatusCondition(metav1.Condition{
+		Type:               ConditionTypeAvailable,
+		Status:             metav1.ConditionFalse,
+		ObservedGeneration: m.GetGeneration(),
+		LastTransitionTime: metav1.Now(),
+		Reason:             ConditionReasonPreparing,
+		Message:            "Mongodb is preparing",
+	})
+}
+
