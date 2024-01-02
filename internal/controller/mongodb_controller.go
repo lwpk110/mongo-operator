@@ -88,7 +88,6 @@ func (r *MongoDBReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			return ctrl.Result{}, err
 		}
 	}
-
 	r.Log.Info("MongoDB resource found:", instance.Name)
 	return ctrl.Result{}, nil
 }
