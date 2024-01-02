@@ -17,9 +17,9 @@ limitations under the License.
 package v1
 
 import (
+	apimeta "k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)	apimeta "k8s.io/apimachinery/pkg/api/meta"
-
+)
 
 const (
 	ConditionTypeProgressing string = "Progressing"
@@ -57,8 +57,8 @@ type Node struct {
 // MongoDBStatus defines the observed state of MongoDB
 type MongoDBStatus struct {
 	// Phase string `json:"phase"`
-	Condition []metav1.Condition `json:"condition"`
-	Nodes     []Node             `json:"nodes,omitempty"`
+	Conditions []metav1.Condition `json:"condition"`
+	Nodes      []Node             `json:"nodes,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -102,7 +102,7 @@ func (m *MongoDB) SetStatusCondition(condition metav1.Condition) {
 }
 
 func (m *MongoDB) InitStatusCondtions() {
-	m.Status.Condition = []metav1.Condition{}
+	m.Status.Conditions = []metav1.Condition{}
 	m.SetStatusCondition(metav1.Condition{
 		Type:               ConditionTypeProgressing,
 		Status:             metav1.ConditionTrue,
@@ -120,4 +120,3 @@ func (m *MongoDB) InitStatusCondtions() {
 		Message:            "Mongodb is preparing",
 	})
 }
-
