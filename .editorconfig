@@ -1,0 +1,3 @@
+[*]
+# 设置换行符为LF（适用于Linux和macOS）
+end_of_line = lf
