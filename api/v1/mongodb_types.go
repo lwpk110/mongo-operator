@@ -35,30 +35,29 @@ const (
 	ConditionReasonReconcileDeployment string = "ReconcileDeployment"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // MongoDBSpec defines the desired state of MongoDB
 type MongoDBSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// Foo is an example field of MongoDB. Edit mongodb_types.go to remove/update
-	ReplicaCount int32  `json:"replicaCount"`
-	StorageSize  string `json:"storageSize"`
+	Image string `json:"image"`
+	// +kubebuilder:validation:Optionl
+	// +kubebuilder:default:1
+	Replicas     int32            `json:"replicas"`
+	ReplicasName string           `json:"replicasName"`
+	Persistence  *PersistenceSpec `json:"persistence"`
 }
 
-type Node struct {
-	HostName string `json:"hostName,omitempty"`
-	IP       string `json:"ip,omitempty"`
-	Status   string `json:"status,omitempty"`
+type PersistenceSpec struct {
+	// +kubebuilder:validation:Optional
+	StorageClass string `json:"storageClass"`
+	Size         string `json:"size"`
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:ReadWriteOnce
+	AccessMode string `json:"accessMode"`
 }
 
 // MongoDBStatus defines the observed state of MongoDB
 type MongoDBStatus struct {
 	// Phase string `json:"phase"`
 	Conditions []metav1.Condition `json:"condition"`
-	Nodes      []Node             `json:"nodes,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -101,7 +100,7 @@ func (m *MongoDB) SetStatusCondition(condition metav1.Condition) {
 	}
 }
 
-func (m *MongoDB) InitStatusCondtions() {
+func (m *MongoDB) InitStatusConditions() {
 	m.Status.Conditions = []metav1.Condition{}
 	m.SetStatusCondition(metav1.Condition{
 		Type:               ConditionTypeProgressing,

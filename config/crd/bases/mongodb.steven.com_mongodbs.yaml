@@ -35,16 +35,14 @@ spec:
           spec:
             description: MongoDBSpec defines the desired state of MongoDB
             properties:
-              replicaCount:
-                description: Foo is an example field of MongoDB. Edit mongodb_types.go
-                  to remove/update
+              replicas:
                 format: int32
                 type: integer
-              storageSize:
+              replicasName:
                 type: string
             required:
-            - replicaCount
-            - storageSize
+            - replicas
+            - replicasName
             type: object
           status:
             description: MongoDBStatus defines the observed state of MongoDB
@@ -116,17 +114,6 @@ spec:
                   - reason
                   - status
                   - type
-                  type: object
-                type: array
-              nodes:
-                items:
-                  properties:
-                    hostName:
-                      type: string
-                    ip:
-                      type: string
-                    status:
-                      type: string
                   type: object
                 type: array
             required:

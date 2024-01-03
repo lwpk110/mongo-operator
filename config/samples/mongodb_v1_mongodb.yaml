@@ -9,4 +9,37 @@ metadata:
     app.kubernetes.io/created-by: mongo-operator
   name: mongodb-sample
 spec:
-  # TODO(user): Add fields here
+  replicaCount: 3
+  storageSize: 2G
+  serviceName: mongodb
+  terminationGracePeriodSeconds: 10
+  labels:
+    role: mongodb
+    env: test
+  podSpec:
+    podName: mongodb
+    commands:
+      - mongod
+      - "--replSet"
+      - rs0
+      - "--smallfiles"
+      - "--noprealloc"
+    image: mongo
+    ports:
+      - containerPort: 27017
+    volumeMounts:
+      - name: mongo-persistent-storage
+        mountPath: /data/db
+  sideCar:
+    name: mongo-sidecar
+    envs:
+      - name: MONGO SIDECAR POD LABELS
+        value: "role=mongo,environment=test"
+      - name: KUBERNETES MONGO SERVICE NAME
+        value: "mongodb"
+    image: cvallance/mongo-k8s-sidecar
+  storage:
+    name: kubernetes.io/glusterfs
+    params:
+      resturl: http://www.baidu.com
+    provisioner: kubernetes.io/glusterfs

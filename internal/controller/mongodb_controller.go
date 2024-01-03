@@ -82,7 +82,7 @@ func (r *MongoDBReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	// 获取资源状态，如果状态不对，初始化，更新
 	readCondition := apimeta.FindStatusCondition(instance.Status.Conditions, mongodbv1.ConditionTypeProgressing)
 	if readCondition == nil || readCondition.ObservedGeneration != instance.GetGeneration() {
-		instance.InitStatusCondtions()
+		instance.InitStatusConditions()
 		if err := r.UpdateStatus(ctx, instance); err != nil {
 			r.Log.Error(err, "Update resource status error when init status stage")
 			return ctrl.Result{}, err
